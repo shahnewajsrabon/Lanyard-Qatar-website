@@ -58,7 +58,7 @@ interface WorkspaceContextProps {
   systemLogs: SystemLog[];
 
   // Mutator Actions (Thread-safe emulation)
-  addTask: (title: string, category: TaskCategory, priority: TaskPriority, description: string) => void;
+  addTask: (title: string, category: TaskCategory, priority: TaskPriority, description: string, customDueDate?: string) => void;
   toggleTaskStatus: (id: string) => void;
   purchaseMaterial: (id: string, rollsQty: number) => void;
   approveDesignProof: (id: string, approverName: string) => void;
@@ -248,14 +248,14 @@ export const WorkspaceProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     setSystemLogs(prev => [newLog, ...prev]);
   };
 
-  const addTask = (title: string, category: TaskCategory, priority: TaskPriority, description: string) => {
+  const addTask = (title: string, category: TaskCategory, priority: TaskPriority, description: string, customDueDate?: string) => {
     const newTask: Task = {
       id: `TSK-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`,
       title,
       category,
       priority,
       status: "Pending",
-      dueDate: new Date(Date.now() + 3 * 24 * 3600 * 1000).toISOString().substring(0, 10), // +3 days
+      dueDate: customDueDate || new Date(Date.now() + 3 * 24 * 3600 * 1000).toISOString().substring(0, 10), // +3 days
       assignedRole: UserRole.Production,
       description
     };

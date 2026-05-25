@@ -39,14 +39,18 @@ export const TasksView: React.FC = () => {
   const [newCategory, setNewCategory] = useState<TaskCategory>(TaskCategory.FabricCutting);
   const [newPriority, setNewPriority] = useState<TaskPriority>(TaskPriority.Medium);
   const [newDesc, setNewDesc] = useState("");
+  const [newDueDate, setNewDueDate] = useState<string>(() => {
+    return new Date().toISOString().substring(0, 10);
+  });
 
   const handleCreateTask = (e: React.FormEvent) => {
     e.preventDefault();
     if (!newTitle.trim()) return;
     
-    addTask(newTitle, newCategory, newPriority, newDesc || "No additional workflow details logged.");
+    addTask(newTitle, newCategory, newPriority, newDesc || "No additional workflow details logged.", newDueDate);
     setNewTitle("");
     setNewDesc("");
+    setNewDueDate(new Date().toISOString().substring(0, 10));
     setShowAddForm(false);
   };
 
@@ -112,6 +116,7 @@ export const TasksView: React.FC = () => {
         </div>
         
         <button
+          id="task-toggle-form-btn"
           onClick={() => {
             setShowAddForm(!showAddForm);
             addLog(`Toggled task dispatch insertion gate`);
@@ -313,6 +318,7 @@ export const TasksView: React.FC = () => {
             <div className="md:col-span-2 space-y-1">
               <label className="text-xs font-semibold text-slate-600">Mandate Task Objective *</label>
               <input
+                id="task-title-input"
                 type="text"
                 required
                 value={newTitle}
@@ -325,6 +331,7 @@ export const TasksView: React.FC = () => {
             <div className="space-y-1">
               <label className="text-xs font-semibold text-slate-600 font-mono">Operations Class</label>
               <select
+                id="task-category-select"
                 value={newCategory}
                 onChange={e => setNewCategory(e.target.value as TaskCategory)}
                 className="w-full bg-white border border-slate-200 rounded-xl px-3.5 py-2 text-xs text-slate-800 focus:outline-none focus:border-[#0F6E56]"
@@ -338,6 +345,7 @@ export const TasksView: React.FC = () => {
             <div className="space-y-1">
               <label className="text-xs font-semibold text-slate-600 font-mono">Priority Urgency</label>
               <select
+                id="task-priority-select"
                 value={newPriority}
                 onChange={e => setNewPriority(e.target.value as TaskPriority)}
                 className="w-full bg-white border border-slate-200 rounded-xl px-3.5 py-2 text-xs text-slate-800 focus:outline-none focus:border-[#0F6E56]"
@@ -348,9 +356,26 @@ export const TasksView: React.FC = () => {
               </select>
             </div>
 
-            <div className="md:col-span-2 space-y-1">
+            <div className="space-y-1">
+              <label className="text-xs font-semibold text-slate-600 font-mono">Target Due Date</label>
+              <input
+                id="task-due-date-input"
+                type="date"
+                required
+                value={newDueDate}
+                onChange={e => setNewDueDate(e.target.value)}
+                className="w-full bg-white border border-slate-200 rounded-xl px-3.5 py-2 text-xs text-slate-800 focus:outline-none focus:border-[#0F6E56] cursor-pointer"
+              />
+            </div>
+
+            <div className="space-y-1">
+              {/* Layout helper spacer for 3-column rows */}
+            </div>
+
+            <div className="md:col-span-3 space-y-1">
               <label className="text-xs font-semibold text-slate-600">Detailed Instructions / Parameters</label>
               <input
+                id="task-desc-input"
                 type="text"
                 value={newDesc}
                 onChange={e => setNewDesc(e.target.value)}
@@ -370,6 +395,7 @@ export const TasksView: React.FC = () => {
               Cancel
             </button>
             <button
+              id="task-dispatch-btn"
               type="submit"
               className="px-4 py-2 rounded-xl text-xs font-bold text-white bg-[#0F6E56] hover:bg-[#0C5844] transition-all cursor-pointer shadow-sm"
             >
@@ -440,13 +466,29 @@ export const TasksView: React.FC = () => {
         {filteredTasks.map((task) => {
           const isCompleted = task.status === "Completed";
           
+          const isNearDue = (() => {
+            if (isCompleted) return false;
+            try {
+              const now = new Date();
+              const due = new Date(task.dueDate + "T23:59:59");
+              if (isNaN(due.getTime())) return false;
+              const diffMs = due.getTime() - now.getTime();
+              return diffMs <= 24 * 60 * 60 * 1000;
+            } catch {
+              return false;
+            }
+          })();
+
           return (
             <div
               key={task.id}
-              className={`card-bg rounded-2xl p-5 relative overflow-hidden transition-all duration-300 group ${
+              id={`task-card-${task.id}`}
+              className={`card-bg rounded-2xl p-5 relative overflow-hidden transition-all duration-300 group border ${
                 isCompleted 
-                  ? "opacity-60" 
-                  : "hover:border-[#0F6E56]/40 hover:shadow-md"
+                  ? "opacity-60 border-slate-100" 
+                  : isNearDue
+                  ? "border border-rose-500 bg-rose-50/10 ring-1 ring-rose-500/10 hover:shadow-md"
+                  : "border border-transparent hover:border-[#0F6E56]/40 hover:shadow-md"
               }`}
             >
               {/* Soft background radial shade */}
@@ -463,9 +505,17 @@ export const TasksView: React.FC = () => {
                   </span>
                 </div>
 
-                <span className={`text-[10px] font-semibold px-2 py-0.5 rounded border ${getPriorityBadge(task.priority)}`}>
-                  {task.priority}
-                </span>
+                <div className="flex items-center gap-1.5">
+                  {isNearDue && (
+                    <span className="text-[9px] font-extrabold px-1.5 py-0.5 bg-rose-600 text-white rounded animate-pulse flex items-center gap-1 uppercase tracking-wider shadow-sm">
+                      <AlertCircle className="w-3 h-3" />
+                      Near Due
+                    </span>
+                  )}
+                  <span className={`text-[10px] font-semibold px-2 py-0.5 rounded border ${getPriorityBadge(task.priority)}`}>
+                    {task.priority}
+                  </span>
+                </div>
               </div>
 
               {/* Content Description */}
@@ -480,13 +530,14 @@ export const TasksView: React.FC = () => {
 
               {/* Card Interactive Footer Action */}
               <div className="border-t border-slate-150 pt-3 flex items-center justify-between relative z-10 text-xs font-mono">
-                <div className="flex items-center gap-1.5 text-slate-400 font-medium">
+                <div className={`flex items-center gap-1.5 font-semibold ${isNearDue ? "text-rose-600 animate-pulse" : "text-slate-400"}`}>
                   <Calendar className="w-3.5 h-3.5" />
                   <span>DUE: {task.dueDate}</span>
                 </div>
 
                 {/* Progress checkbox action switch */}
                 <button
+                  id={`task-toggle-btn-${task.id}`}
                   onClick={() => toggleTaskStatus(task.id)}
                   className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold font-mono transition-all border cursor-pointer ${
                     isCompleted
