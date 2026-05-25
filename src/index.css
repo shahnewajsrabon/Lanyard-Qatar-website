@@ -1,0 +1,54 @@
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap');
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Plus Jakarta Sans", "Helvetica Neue", Arial, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
+}
+
+/* Custom theme CSS variables & helper utilities from LanyardQatar High Density style sheet (White Theme) */
+.cyber-mint {
+  color: #0F6E56;
+}
+
+.bg-cyber-mint {
+  background-color: #0F6E56;
+}
+
+.border-deep-teal {
+  border-color: rgba(15, 110, 86, 0.2);
+}
+
+.glow-emerald {
+  background: radial-gradient(circle at 50% 50%, rgba(94, 217, 176, 0.25) 0%, transparent 70%);
+}
+
+.card-bg {
+  background: rgba(255, 255, 255, 0.95) !important;
+  backdrop-filter: blur(10px) !important;
+  border: 1px solid rgba(15, 110, 86, 0.15) !important;
+  box-shadow: 0 10px 30px rgba(15, 110, 86, 0.04) !important;
+}
+
+.scroll-hide::-webkit-scrollbar {
+  display: none;
+}
+
+/* Custom Scrollbar Styles for High Fidelity Panels */
+.customize-scrollbar::-webkit-scrollbar {
+  width: 5px;
+}
+
+.customize-scrollbar::-webkit-scrollbar-track {
+  background: #F4F7F6;
+}
+
+.customize-scrollbar::-webkit-scrollbar-thumb {
+  background: #CBD5E1;
+  border-radius: 9px;
+}
+
+.customize-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: #94A3B8;
+}
+

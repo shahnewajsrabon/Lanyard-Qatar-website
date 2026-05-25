@@ -1,0 +1,6 @@
+{
+  "name": "LanyardQatar",
+  "description": "Automated Corporate Operations & Logistics System. An advanced ERP and operations management dashboard with secure biometric access, live factory tracking, role-based workflows, and supply chain logistics monitoring.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
